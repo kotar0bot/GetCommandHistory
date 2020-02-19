@@ -8,6 +8,9 @@
 #include <cstdio>
 
 #include <codecvt>
+#pragma comment(lib, "shlwapi")
+#include <shlwapi.h>
+#include <atlstr.h>
 
 namespace GetCommandHistory {
 
@@ -85,11 +88,18 @@ namespace GetCommandHistory {
 		}
 #pragma endregion
 	private: System::Void MyForm_Load(System::Object^ sender, System::EventArgs^ e) {
-		ShellExecute(NULL, L"open", L"powershell.exe", L"/c Get-Content (Get-PSReadlineOption).HistorySavePath > .\\test.txt ", L"", SW_HIDE);
+		ShellExecute(NULL, L"open", L"powershell.exe", L"/c Get-Content (Get-PSReadlineOption).HistorySavePath > .\\test.txt -Encoding utf8", L"", SW_HIDE);
 
 		setlocale(LC_ALL, "");
+		CString path = _T(".\\test.txt");
 
-		wifstream ifs(".\\test.txt");
+		while(!PathFileExists(path))
+		{
+			if (PathFileExists(path)) {
+				break;
+			}
+		}
+		wifstream ifs(path);
 		ifs.imbue(locale(locale::empty(), new codecvt_utf16<wchar_t, 0x10ffff, little_endian>));
 		wstring str((istreambuf_iterator<wchar_t>(ifs)), istreambuf_iterator<wchar_t>());
 
